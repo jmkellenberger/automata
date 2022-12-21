@@ -16,6 +16,7 @@ class Cell {
 
   draw() {
     this.context.fillStyle = this.alive ? Cell.aliveColor : Cell.deadColor;
+    this.context.strokeWidth = 0;
     this.context.fillRect(
       this.gridX * Cell.width,
       this.gridY * Cell.height,
@@ -119,11 +120,11 @@ class Simulation {
   }
 
   drawStats() {
-    this.context.font = "14px serif";
+    this.context.font = "18px Optima";
     this.context.fillStyle = "white";
     this.context.fillText(`Generations: ${this.generation}`, 10, 20);
-    this.context.fillText(`Cells Alive: ${this.alive}`, 10, 38);
-    this.context.fillText(`Cells Dead: ${this.dead}`, 10, 56);
+    this.context.fillText(`Cells Alive: ${this.alive}`, 10, 40);
+    this.context.fillText(`Cells Dead: ${this.dead}`, 10, 60);
   }
 
   draw() {
@@ -166,6 +167,16 @@ window.onload = () => {
 
   let simulation = new Simulation("simCanvas");
 
+  window.addEventListener("resize", resizeCanvas, false);
+  resizeCanvas();
+  function resizeCanvas() {
+    canvas.width = Math.min(1024, window.innerWidth * 0.75);
+    canvas.height = canvas.width * 1;
+    Cell.height = canvas.height / Simulation.numRows;
+    Cell.width = canvas.width / Simulation.numColumns;
+    simulation.draw();
+  }
+
   startButton.addEventListener("click", () => {
     simulation.running = true;
     simulation.run();
@@ -196,6 +207,7 @@ window.onload = () => {
   clearButton.addEventListener("click", () => {
     const oldProb = Cell.aliveProbability;
     Cell.aliveProbability = 1.0;
+    simulation.running = false;
     simulation = new Simulation("simCanvas");
     Cell.aliveProbability = oldProb;
   });

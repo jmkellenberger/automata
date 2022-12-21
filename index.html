@@ -9,15 +9,37 @@
   </head>
 
   <body>
-    <h1 id="page-title">Conway's Game of Life</h1>
-    <canvas id="simCanvas" width="800" height="800"></canvas>
+    <header id="page-title">Conway's Game of Life</header>
+    <div id="canvas">
+      <canvas id="simCanvas"></canvas>
+    </div>
     <div id="controls">
-      <button id="start-button">Start</button>
-      <button id="step-button">Step</button>
-      <button id="stop-button">Stop</button>
-      <div>
+      <div class="row">
+        <button id="start-button">Start</button>
+        <button id="step-button">Step</button>
+        <button id="stop-button">Stop</button>
         <button id="reset-button">Reset</button>
-        <div id="input">
+        <button id="clear-button">Clear</button>
+      </div>
+      <div class="row">
+        <div class="input-container">
+          <input id="statistics" type="checkbox" name="statistics" checked />
+          <label for="statistics">Stats</label>
+        </div>
+        <div class="input-container">
+          <input
+            id="alive-color"
+            name="alive-color"
+            type="color"
+            value="#6557DA"
+          />
+          <label for="alive-color">Alive</label>
+        </div>
+        <div class="input-container">
+          <input id="dead-color" name="dead-color" type="color" value="#111" />
+          <label for="dead-color">Dead</label>
+        </div>
+        <div class="input-container">
           <input
             id="probability"
             type="range"
@@ -26,33 +48,9 @@
             min="0.0"
             max="1.0"
             step="0.1"
-            list="probabilities"
           />
-          <datalist id="probabilities">
-            <option value="0.0" label="0%"></option>
-            <option value="0.5" label="50%"></option>
-            <option value="1.0" label="100%"></option>
-          </datalist>
-          <label for="statistics">Alive</label>
+          <label for="probability">Live Cells</label>
         </div>
-      </div>
-      <button id="clear-button">Clear</button>
-      <div id="color-select">
-        <input
-          id="alive-color"
-          name="alive-color"
-          type="color"
-          value="#6557DA"
-        />
-        <label for="alive-color">Alive</label>
-      </div>
-      <div id="color-select">
-        <input id="dead-color" name="dead-color" type="color" value="#111" />
-        <label for="dead-color">Dead</label>
-      </div>
-      <div id="stats-container">
-        <input id="statistics" type="checkbox" name="statistics" checked />
-        <label for="statistics">Stats</label>
       </div>
     </div>
     <script src="scripts/conway.js"></script>

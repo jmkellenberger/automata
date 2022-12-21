@@ -1,73 +1,82 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+header {
+  line-height: 1.2;
+  text-align: center;
+  font-size: 2rem;
+  padding: 15px;
+}
+
 body {
   background: #111;
   color: #f8f8f8;
+  font-family: Optima, sans-serif;
+}
+
+#canvas {
+  text-align: center;
+  margin-bottom: 1rem;
 }
 
 canvas {
-  background: #f8f8f8;
-  padding: 0;
-  margin: 0 auto;
-  margin-bottom: 1rem;
-  display: block;
+  background: #111;
 }
 
-#page-title {
-  text-align: center;
+button,
+input {
+  width: 75%;
+  border-radius: 16px;
+  border: none;
+  background-color: #262626;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+button {
+  padding: 5px 15px 5px 15px;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 15%;
+  width: 40px;
+  height: 30px;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: none;
 }
 
 #controls {
   display: flex;
-  justify-content: center;
-}
-
-#controls button {
-  margin: 5px;
-  padding: 10px;
-  height: 40px;
-  width: 60px;
-}
-
-#probability {
-  width: 60px;
-}
-
-#color-select {
-  display: flex;
   flex-direction: column;
-  align-items: center;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 1vh;
 }
 
-#color-select input {
-  height: 40px;
-  width: 60px;
-  margin: 5px;
-}
-
-#input {
+.row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-#statistics {
-  margin-top: 17px;
-  margin-bottom: 19px;
-}
-#stats-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  margin-left: 10px;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
-datalist {
+.input-container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  writing-mode: vertical-lr;
-  width: 60px;
-}
-
-option {
-  padding: 0;
+  align-items: center;
 }
