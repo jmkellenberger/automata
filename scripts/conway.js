@@ -1,3 +1,53 @@
+// Relative coordinates for creating common Conway patterns
+const SHAPES = {
+  Cell: [[0, 0]],
+  Glider: [
+    [0, 1],
+    [1, 2],
+    [2, 0],
+    [2, 1],
+    [2, 2],
+  ],
+  "Gosper Glider Gun": [
+    [1, 5],
+    [1, 6],
+    [2, 5],
+    [2, 6],
+    [11, 5],
+    [11, 6],
+    [11, 7],
+    [12, 4],
+    [12, 8],
+    [13, 3],
+    [13, 9],
+    [14, 3],
+    [14, 9],
+    [15, 6],
+    [16, 4],
+    [16, 8],
+    [17, 5],
+    [17, 6],
+    [17, 7],
+    [18, 6],
+    [21, 3],
+    [21, 4],
+    [21, 5],
+    [22, 3],
+    [22, 4],
+    [22, 5],
+    [23, 2],
+    [23, 6],
+    [25, 1],
+    [25, 2],
+    [25, 6],
+    [25, 7],
+    [35, 3],
+    [35, 4],
+    [36, 3],
+    [36, 4],
+  ],
+};
+
 class Cell {
   static aliveColor = "#6557DA";
   static deadColor = "#111";
@@ -33,6 +83,7 @@ class Simulation {
   static refreshTime = 100;
   static font = "16px Optima";
   static textSpacing = 20;
+  static shapes = SHAPES;
 
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -60,11 +111,9 @@ class Simulation {
     }
   }
 
-  addCell(x, y) {
-    let idx = this.gridToIndex(x, y);
+  toggleCell(idx) {
     let cell = this.cells[idx];
 
-    // Swap state on click
     if (cell.alive) {
       cell.alive = false;
       this.totalDead += 1;
@@ -72,6 +121,53 @@ class Simulation {
       cell.alive = true;
       this.totalBorn += 1;
     }
+  }
+
+  rotateCoords(x, y, angle) {
+    // Convert the angle from degrees to radians
+    let radians = (angle * Math.PI) / 180;
+
+    // Create the rotation matrix
+    let rotationMatrix = [
+      [Math.cos(radians), -Math.sin(radians)],
+      [Math.sin(radians), Math.cos(radians)],
+    ];
+
+    // Rotate the coordinates using the rotation matrix
+    let rotatedX = rotationMatrix[0][0] * x + rotationMatrix[0][1] * y;
+    let rotatedY = rotationMatrix[1][0] * x + rotationMatrix[1][1] * y;
+
+    return [rotatedX, rotatedY];
+  }
+
+  addShape(shape, angle, centerX, centerY) {
+    const shapeToAdd = Simulation.shapes[shape];
+    // Iterate through the cells in the shape pattern
+    for (let i = 0; i < shapeToAdd.length; i++) {
+      let x = shapeToAdd[i][0];
+      let y = shapeToAdd[i][1];
+
+      // Rotate the cell coordinates using the rotateCoords() helper function
+      let rotatedCoords = this.rotateCoords(x, y, angle);
+      let rotatedX = rotatedCoords[0];
+      let rotatedY = rotatedCoords[1];
+
+      // Convert the rotated cell coordinates to absolute grid coordinates
+      let gridX = centerX + rotatedX - 1;
+      let gridY = centerY + rotatedY - 1;
+
+      // If cell in grid, toggle it's state
+      if (
+        gridX >= 0 &&
+        gridX < Simulation.numColumns &&
+        gridY >= 0 &&
+        gridY < Simulation.numRows
+      ) {
+        let idx = this.gridToIndex(gridX, gridY);
+        this.toggleCell(idx);
+      }
+    }
+
     this.draw();
   }
 
@@ -208,6 +304,7 @@ class Simulation {
 
 window.onload = () => {
   const canvas = document.getElementById("simCanvas");
+  const ctx = canvas.getContext("2d");
   const startButton = document.getElementById("start-button");
   const stepButton = document.getElementById("step-button");
   const stopButton = document.getElementById("stop-button");
@@ -218,7 +315,18 @@ window.onload = () => {
   const displayStats = document.getElementById("statistics");
   const probabilitySlider = document.getElementById("probability");
   const refreshSlider = document.getElementById("refresh-time");
+  const shapeSelector = document.getElementById("shape-selector");
+  const angleSelector = document.getElementById("angle-select");
 
+  const availableShapes = Object.keys(SHAPES);
+  availableShapes.map((shape) => {
+    let opt = document.createElement("option");
+    opt.value = shape;
+    opt.innerHTML = shape;
+    shapeSelector.appendChild(opt);
+  });
+
+  let currentShape = shapeSelector.value;
   let simulation = new Simulation("simCanvas");
 
   window.addEventListener("resize", resizeCanvas, false);
@@ -290,6 +398,11 @@ window.onload = () => {
     (e) => (Simulation.refreshTime = e.target.value)
   );
 
+  shapeSelector.addEventListener(
+    "change",
+    (e) => (currentShape = e.target.value)
+  );
+
   canvas.addEventListener("click", (e) => {
     if (simulation.running) {
       return;
@@ -298,11 +411,13 @@ window.onload = () => {
     // Convert screen-space mouse position to canvas-space
     let xVal = e.pageX - canvas.offsetLeft;
     let yVal = e.pageY - canvas.offsetTop;
-
     // Convert pixels to cell coordinates
     let x = Math.floor(xVal / Cell.width);
     let y = Math.floor(yVal / Cell.height);
 
-    simulation.addCell(x, y);
+    let currentAngle = angleSelector.value;
+    console.log(currentAngle);
+
+    simulation.addShape(currentShape, currentAngle, x, y);
   });
 };
