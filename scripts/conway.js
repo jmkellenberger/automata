@@ -27,8 +27,12 @@ class Cell {
 }
 
 class Simulation {
-  static numColumns = 80;
-  static numRows = 80;
+  static numColumns = 100;
+  static numRows = 100;
+  static displayStats = true;
+  static refreshTime = 100;
+  static font = "16px Optima";
+  static textSpacing = 20;
 
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -39,10 +43,12 @@ class Simulation {
     this.dead = 0;
 
     this.running = false;
-    this.displayStats = true;
 
     this.createGrid();
-    this.countCells;
+    this.countCurrentCells;
+    this.totalBorn = this.cellsAlive();
+    this.totalDead = this.cellsDead();
+
     window.requestAnimationFrame(() => this.draw());
   }
 
@@ -54,7 +60,29 @@ class Simulation {
     }
   }
 
-  countCells() {
+  addCell(x, y) {
+    let idx = this.gridToIndex(x, y);
+    let cell = this.cells[idx];
+
+    // Swap state on click
+    if (cell.alive) {
+      cell.alive = false;
+      this.totalDead += 1;
+    } else {
+      cell.alive = true;
+      this.totalBorn += 1;
+    }
+    this.draw();
+  }
+
+  cellsAlive() {
+    return this.cells.filter((cell) => cell.alive).length;
+  }
+  cellsDead() {
+    return this.cells.length - this.cellsAlive();
+  }
+
+  countCurrentCells() {
     let alive = this.cells.filter((cell) => cell.alive);
     this.alive = alive.length;
     this.dead = this.cells.length - this.alive;
@@ -98,9 +126,15 @@ class Simulation {
         } else if (numAlive == 3) {
           // Make alive
           this.cells[centerIndex].nextAlive = true;
+          if (!this.cells[centerIndex].alive) {
+            this.totalBorn += 1;
+          }
         } else {
           // Make dead
           this.cells[centerIndex].nextAlive = false;
+          if (this.cells[centerIndex].alive) {
+            this.totalDead += 1;
+          }
         }
       }
     }
@@ -120,23 +154,42 @@ class Simulation {
   }
 
   drawStats() {
-    this.context.font = "18px Optima";
+    this.context.font = Simulation.font;
     this.context.fillStyle = "white";
-    this.context.fillText(`Generations: ${this.generation}`, 10, 20);
-    this.context.fillText(`Cells Alive: ${this.alive}`, 10, 40);
-    this.context.fillText(`Cells Dead: ${this.dead}`, 10, 60);
+    this.context.fillText(
+      `Generation: ${this.generation}`,
+      10,
+      1 * Simulation.textSpacing
+    );
+    this.context.fillText(
+      `Alive: ${this.alive}`,
+      10,
+      2 * Simulation.textSpacing
+    );
+    this.context.fillText(
+      `Total Births: ${this.totalBorn}`,
+      10,
+      3 * Simulation.textSpacing
+    );
+    this.context.fillText(`Dead: ${this.dead}`, 10, 4 * Simulation.textSpacing);
+    this.context.fillText(
+      `Total Deaths: ${this.totalDead}`,
+      10,
+      5 * Simulation.textSpacing
+    );
   }
 
   draw() {
-    this.countCells();
+    this.countCurrentCells();
     this.drawCells();
-    if (this.displayStats) {
+    if (Simulation.displayStats) {
       this.drawStats();
     }
   }
 
   update() {
     this.checkSurrounding();
+
     this.generation += 1;
     this.draw();
   }
@@ -148,7 +201,7 @@ class Simulation {
       // Keep requesting new frames
       setTimeout(() => {
         window.requestAnimationFrame(() => this.run());
-      }, 100);
+      }, Simulation.refreshTime);
     }
   }
 }
@@ -164,16 +217,21 @@ window.onload = () => {
   const deadColorSelector = document.getElementById("dead-color");
   const displayStats = document.getElementById("statistics");
   const probabilitySlider = document.getElementById("probability");
+  const refreshSlider = document.getElementById("refresh-time");
 
   let simulation = new Simulation("simCanvas");
 
   window.addEventListener("resize", resizeCanvas, false);
   resizeCanvas();
   function resizeCanvas() {
+    const fontRatio = 20 / 1024;
     canvas.width = Math.min(1024, window.innerWidth * 0.75);
     canvas.height = canvas.width * 1;
     Cell.height = canvas.height / Simulation.numRows;
     Cell.width = canvas.width / Simulation.numColumns;
+    Simulation.font =
+      (Math.max(14, canvas.width * fontRatio) | 0) + "px Optima";
+    Simulation.textSpacing = Math.max(14, canvas.width * fontRatio * 1.1) | 0;
     simulation.draw();
   }
 
@@ -223,9 +281,14 @@ window.onload = () => {
   });
 
   displayStats.addEventListener("change", (e) => {
-    simulation.displayStats = e.target.checked;
+    Simulation.displayStats = e.target.checked;
     simulation.draw();
   });
+
+  refreshSlider.addEventListener(
+    "change",
+    (e) => (Simulation.refreshTime = e.target.value)
+  );
 
   canvas.addEventListener("click", (e) => {
     if (simulation.running) {
@@ -240,16 +303,6 @@ window.onload = () => {
     let x = Math.floor(xVal / Cell.width);
     let y = Math.floor(yVal / Cell.height);
 
-    // Convert cell coordinate to cell index
-    let idx = simulation.gridToIndex(x, y);
-    let cell = simulation.cells[idx];
-
-    // Swap state on click
-    if (cell.alive) {
-      cell.alive = false;
-    } else {
-      cell.alive = true;
-    }
-    simulation.draw();
+    simulation.addCell(x, y);
   });
 };
