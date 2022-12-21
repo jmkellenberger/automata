@@ -23,6 +23,12 @@ canvas {
 #controls button {
   margin: 5px;
   padding: 10px;
+  height: 40px;
+  width: 60px;
+}
+
+#probability {
+  width: 60px;
 }
 
 #color-select {
@@ -32,7 +38,36 @@ canvas {
 }
 
 #color-select input {
-  height: 30px;
-  width: 50px;
+  height: 40px;
+  width: 60px;
   margin: 5px;
+}
+
+#input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#statistics {
+  margin-top: 17px;
+  margin-bottom: 19px;
+}
+#stats-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-left: 10px;
+}
+
+datalist {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  writing-mode: vertical-lr;
+  width: 60px;
+}
+
+option {
+  padding: 0;
 }

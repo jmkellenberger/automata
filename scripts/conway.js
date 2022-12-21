@@ -1,8 +1,9 @@
 class Cell {
-  static aliveColor = "#ff8080";
-  static deadColor = "#303030";
+  static aliveColor = "#6557DA";
+  static deadColor = "#111";
   static width = 10;
   static height = 10;
+  static aliveProbability = 0.5;
 
   constructor(context, gridX, gridY) {
     this.context = context;
@@ -10,7 +11,7 @@ class Cell {
     this.gridX = gridX;
     this.gridY = gridY;
 
-    this.alive = Math.random() > 0.5;
+    this.alive = Math.random() > Cell.aliveProbability;
   }
 
   draw() {
@@ -32,13 +33,16 @@ class Simulation {
     this.canvas = document.getElementById(canvasId);
     this.context = this.canvas.getContext("2d");
     this.cells = [];
-
-    this.createGrid();
+    this.generation = 0;
+    this.alive = 0;
+    this.dead = 0;
 
     this.running = false;
+    this.displayStats = true;
 
-    // Request an animation frame for the first time
-    window.requestAnimationFrame(() => this.update());
+    this.createGrid();
+    this.countCells;
+    window.requestAnimationFrame(() => this.draw());
   }
 
   createGrid() {
@@ -47,6 +51,12 @@ class Simulation {
         this.cells.push(new Cell(this.context, x, y));
       }
     }
+  }
+
+  countCells() {
+    let alive = this.cells.filter((cell) => cell.alive);
+    this.alive = alive.length;
+    this.dead = this.cells.length - this.alive;
   }
 
   isAlive(x, y) {
@@ -108,10 +118,26 @@ class Simulation {
     }
   }
 
+  drawStats() {
+    this.context.font = "14px serif";
+    this.context.fillStyle = "white";
+    this.context.fillText(`Generations: ${this.generation}`, 10, 20);
+    this.context.fillText(`Cells Alive: ${this.alive}`, 10, 38);
+    this.context.fillText(`Cells Dead: ${this.dead}`, 10, 56);
+  }
+
+  draw() {
+    this.countCells();
+    this.drawCells();
+    if (this.displayStats) {
+      this.drawStats();
+    }
+  }
+
   update() {
     this.checkSurrounding();
-
-    this.drawCells();
+    this.generation += 1;
+    this.draw();
   }
 
   run() {
@@ -135,6 +161,8 @@ window.onload = () => {
   const clearButton = document.getElementById("clear-button");
   const aliveColorSelector = document.getElementById("alive-color");
   const deadColorSelector = document.getElementById("dead-color");
+  const displayStats = document.getElementById("statistics");
+  const probabilitySlider = document.getElementById("probability");
 
   let simulation = new Simulation("simCanvas");
 
@@ -157,25 +185,34 @@ window.onload = () => {
     simulation = new Simulation("simCanvas");
   });
 
+  probabilitySlider.addEventListener("input", (e) => {
+    Cell.aliveProbability = 1.0 - e.target.value;
+    if (simulation.running) {
+      return;
+    }
+    simulation = new Simulation("simCanvas");
+  });
+
   clearButton.addEventListener("click", () => {
-    simulation.running = false;
-    simulation.cells = simulation.cells.map((cell) => {
-      cell.alive = false;
-      return cell;
-    });
-    simulation.update();
+    const oldProb = Cell.aliveProbability;
+    Cell.aliveProbability = 1.0;
+    simulation = new Simulation("simCanvas");
+    Cell.aliveProbability = oldProb;
   });
 
   aliveColorSelector.addEventListener("input", (e) => {
-    const color = e.target.value;
-    Cell.aliveColor = color;
-    simulation.drawCells();
+    Cell.aliveColor = e.target.value;
+    simulation.draw();
   });
 
   deadColorSelector.addEventListener("input", (e) => {
-    const color = e.target.value;
-    Cell.deadColor = color;
-    simulation.drawCells();
+    Cell.deadColor = e.target.value;
+    simulation.draw();
+  });
+
+  displayStats.addEventListener("change", (e) => {
+    simulation.displayStats = e.target.checked;
+    simulation.draw();
   });
 
   canvas.addEventListener("click", (e) => {
@@ -192,7 +229,7 @@ window.onload = () => {
     let y = Math.floor(yVal / Cell.height);
 
     // Convert cell coordinate to cell index
-    let idx = x + y * Simulation.numColumns;
+    let idx = simulation.gridToIndex(x, y);
     let cell = simulation.cells[idx];
 
     // Swap state on click
@@ -201,6 +238,6 @@ window.onload = () => {
     } else {
       cell.alive = true;
     }
-    cell.draw();
+    simulation.draw();
   });
 };
