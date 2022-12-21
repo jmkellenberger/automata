@@ -5,11 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles/style.css" />
-    <title>Ants</title>
+    <title>Conway's Game of Life</title>
   </head>
 
   <body>
+    <h1 id="page-title">Conway's Game of Life</h1>
     <canvas id="simCanvas" width="800" height="800"></canvas>
-    <script src="scripts/ant.js"></script>
+    <div id="controls">
+      <button id="start-button">Start</button>
+      <button id="step-button">Step</button>
+      <button id="stop-button">Stop</button>
+      <button id="reset-button">Reset</button>
+      <button id="clear-button">Clear</button>
+      <div id="color-select">
+        <input id="alive-color" type="color" value="#ff8080" />
+        <label for="alive-color">Alive</label>
+      </div>
+      <div id="color-select">
+        <input id="dead-color" type="color" value="#303030" />
+        <label for="dead-color">Dead</label>
+      </div>
+    </div>
+
+    <script src="scripts/conway.js"></script>
   </body>
 </html>

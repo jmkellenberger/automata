@@ -10,3 +10,29 @@ canvas {
   margin-bottom: 1rem;
   display: block;
 }
+
+#page-title {
+  text-align: center;
+}
+
+#controls {
+  display: flex;
+  justify-content: center;
+}
+
+#controls button {
+  margin: 5px;
+  padding: 10px;
+}
+
+#color-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#color-select input {
+  height: 30px;
+  width: 50px;
+  margin: 5px;
+}
